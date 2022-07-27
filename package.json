@@ -1,0 +1,17 @@
+{
+  "name": "lambda-import",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1163.0",
+    "axios": "^0.27.2",
+    "bluebird": "^3.7.2",
+    "pdf2pic": "^2.1.4"
+  }
+}
