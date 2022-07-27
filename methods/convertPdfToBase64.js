@@ -4,14 +4,6 @@ const { createCanvas } = require('canvas');
 const { uploadToS3 } = require('./uploadToS3');
 const { getPage } = require('./utils');
 
-const options = {
-  density: 100,
-  quality: 95,
-  format: 'png',
-  width: 1080,
-  height: 607,
-};
-
 const convertPdfToBase64 = async (pdfBuffer, fileIdentifier) => {
   const slides = [];
 
