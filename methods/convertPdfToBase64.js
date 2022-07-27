@@ -1,5 +1,8 @@
-const { fromBuffer } = require('pdf2pic');
+const pdfjs = require('pdfjs-dist/legacy/build/pdf.min');
+
+const { createCanvas } = require('canvas');
 const { uploadToS3 } = require('./uploadToS3');
+const { getPage } = require('./utils');
 
 const options = {
   density: 100,
@@ -10,21 +13,38 @@ const options = {
 };
 
 const convertPdfToBase64 = async (pdfBuffer, fileIdentifier) => {
-  let pageNumber = 1;
   const slides = [];
-  while (true) {
-    const val = await fromBuffer(pdfBuffer, options).bulk(pageNumber, true);
-    const { base64 } = val[0];
-    if (base64.length < 172) {
-      break;
-    }
+
+  const pdf = await pdfjs.getDocument(pdfBuffer).promise;
+  const numOfPages = pdf.numPages || 0;
+
+  console.log(`Uploading PDF ${fileIdentifier} ~ pages ${numOfPages}`);
+
+  if (numOfPages === 0) {
+    throw Error('0 slides found');
+  }
+
+  for (let pageNumber = 1; pageNumber <= numOfPages; pageNumber++) {
+    const page = await getPage(pdf, pageNumber);
+    const viewport = page.getViewport({
+      scale: 1.5,
+      dontFlip: false,
+    });
+    const canvas = createCanvas(viewport.width, viewport.height);
+    const ctx = canvas.getContext('2d');
+    await page.render({
+      canvasContext: ctx,
+      viewport,
+    }).promise;
+
+    const dataURL = canvas.toDataURL();
     const URL = await uploadToS3({
-      content: base64,
+      content: dataURL,
       key: `${fileIdentifier}-${pageNumber}`,
     });
-    pageNumber++;
     slides.push(URL);
   }
+
   return { slides };
 };
 
