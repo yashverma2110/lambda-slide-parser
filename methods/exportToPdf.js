@@ -17,6 +17,8 @@ const exportToPdf = async (fileId, type, token) => {
     },
   });
 
+  console.log('Converted to PDF');
+
   return {
     buffer: response.data,
   };
